@@ -1,0 +1,78 @@
+### Review Azure Activity
+
+```kusto
+AzureActivity
+| where TimeGenerated > ago(24h)
+| project
+    TimeGenerated,
+    Caller,
+    OperationNameValue,
+    ActivityStatusValue,
+    ActivitySubstatusValue,
+    ResourceGroup
+| order by TimeGenerated desc
+```
+
+### Activity by Caller
+
+```kusto
+AzureActivity
+| where TimeGenerated > ago(24h)
+| summarize Operations=count() by Caller
+| order by Operations desc
+```
+
+### Activity by Operation
+
+```kusto
+AzureActivity
+| where TimeGenerated > ago(24h)
+| summarize Operations=count() by OperationNameValue
+| order by Operations desc
+```
+
+### Failed Operations
+
+```kusto
+AzureActivity
+| where TimeGenerated > ago(24h)
+| where ActivityStatusValue =~ "Failure"
+| project
+    TimeGenerated,
+    Caller,
+    OperationNameValue,
+    ActivityStatusValue,
+    ResourceGroup
+| order by TimeGenerated desc
+```
+
+### Correlation Analysis
+
+```kusto
+AzureActivity
+| where TimeGenerated > ago(24h)
+| summarize
+    Events=count(),
+    Operations=make_set(OperationNameValue),
+    Statuses=make_set(ActivityStatusValue),
+    Resources=make_set(ResourceId)
+    by CorrelationId
+| order by Events desc
+```
+
+### Authorization Analysis
+
+```kusto
+AzureActivity
+| where TimeGenerated > ago(24h)
+| project
+    TimeGenerated,
+    Caller,
+    CallerIpAddress,
+    OperationNameValue,
+    ActivityStatusValue,
+    ResourceId,
+    CorrelationId,
+    Authorization_d
+| order by TimeGenerated asc
+```
