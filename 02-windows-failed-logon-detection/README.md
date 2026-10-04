@@ -1299,8 +1299,6 @@ This project demonstrates practical experience with:
 
 ## 28. Portfolio Evidence
 
-Recommended screenshots:
-
 ```text
 screenshots/
 ├── 01-securityevent-ingestion.png
