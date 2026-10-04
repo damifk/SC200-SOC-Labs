@@ -1,0 +1,37 @@
+// Verify Windows Security Event ingestion
+SecurityEvent
+| take 20
+
+
+// Count collected Windows Event IDs
+SecurityEvent
+| where TimeGenerated > ago(1h)
+| summarize Events=count() by EventID
+| order by Events desc
+
+
+// Investigate failed authentication attempts
+SecurityEvent
+| where EventID == 4625
+| project
+    TimeGenerated,
+    Computer,
+    TargetAccount,
+    LogonType,
+    IpAddress,
+    FailureReason,
+    Status,
+    SubStatus
+| order by TimeGenerated desc
+
+
+// Detect repeated failed logons
+SecurityEvent
+| where EventID == 4625
+| summarize
+    FailedAttempts=count(),
+    FirstFailure=min(TimeGenerated),
+    LastFailure=max(TimeGenerated)
+    by Computer, TargetAccount, IpAddress, LogonType
+| where FailedAttempts >= 5
+| extend TimeGenerated = LastFailure
